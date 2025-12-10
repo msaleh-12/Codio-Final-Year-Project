@@ -36,6 +36,9 @@ CORS(app)  # Enable CORS for frontend integration
 service = PauseToCodeService(cache_dir="codio_cache")
 db = CodioDatabase(db_path="codio_cache/codio.db")
 
+# Server startup timestamp (used to invalidate old sessions)
+SERVER_START_TIME = datetime.now().isoformat()
+
 # Request tracking
 request_log = []
 
@@ -47,7 +50,8 @@ def health_check():
         "status": "healthy",
         "service": "Codio Pause-to-Code API",
         "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "server_start_time": SERVER_START_TIME
     })
 
 

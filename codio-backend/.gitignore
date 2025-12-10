@@ -17,8 +17,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -54,15 +52,13 @@ Thumbs.db
 # Cache directories
 codio_cache/videos/
 codio_cache/*_analysis.json
-video_cache/
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# Database (keep structure, ignore data)
+codio_cache/*.db
+codio_cache/*.sqlite
+codio_cache/*.sqlite3
 
 # Test files
-test_*.py
 check_*.sh
 
 # Temporary files

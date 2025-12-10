@@ -1,0 +1,7 @@
+cd codio-backend && ../.venv/bin/python pause_to_code_api.py &
+
+
+cd codio-frontend && npm run dev &
+
+
+cd codio-backend && ../.venv/bin/python pause_to_code_api.py & sleep 2 && cd ../codio-frontend && npm run dev &

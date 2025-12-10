@@ -14,24 +14,56 @@ export default function Home() {
 
   // Check for existing session on mount
   useEffect(() => {
-    console.log("[Home] Checking for existing user session...")
-    const storedUser = localStorage.getItem("codio_user")
-    
-    if (storedUser) {
+    const checkSession = async () => {
+      console.log("[Home] Checking for existing user session...")
+      
+      // Check if server has restarted
       try {
-        const userData = JSON.parse(storedUser)
-        console.log("[Home] Found stored user:", userData.email)
-        setUser(userData)
-        setIsLoggedIn(true)
+        const response = await fetch('http://localhost:8080/health')
+        const data = await response.json()
+        const serverStartTime = data.server_start_time
+        
+        // Get stored server start time
+        const storedStartTime = localStorage.getItem('codio_server_start_time')
+        
+        if (storedStartTime && storedStartTime !== serverStartTime) {
+          // Server restarted - clear session
+          console.log("[Home] Server restarted detected - clearing session")
+          clearTokens()
+          localStorage.removeItem("codio_user")
+          localStorage.setItem('codio_server_start_time', serverStartTime)
+          setIsLoading(false)
+          return
+        }
+        
+        // Store current server start time
+        if (!storedStartTime) {
+          localStorage.setItem('codio_server_start_time', serverStartTime)
+        }
       } catch (error) {
-        console.error("[Home] Error parsing stored user:", error)
-        localStorage.removeItem("codio_user")
+        console.error("[Home] Error checking server status:", error)
       }
-    } else {
-      console.log("[Home] No stored user found")
+      
+      const storedUser = localStorage.getItem("codio_user")
+      
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          console.log("[Home] Found stored user:", userData.email)
+          setUser(userData)
+          setIsLoggedIn(true)
+        } catch (error) {
+          console.error("[Home] Error parsing stored user:", error)
+          localStorage.removeItem("codio_user")
+        }
+      } else {
+        console.log("[Home] No stored user found")
+      }
+      
+      setIsLoading(false)
     }
     
-    setIsLoading(false)
+    checkSession()
   }, [])
 
   const handleLogin = async (email: string, name: string) => {
