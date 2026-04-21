@@ -1,0 +1,27 @@
+# ============================================================================
+# Codio Backend - Python Dependencies
+# Install: pip install -r requirements.txt
+# ============================================================================
+
+# --- Web Framework ---
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# --- AI / ML ---
+google-generativeai>=0.8.0
+Pillow>=10.0.0
+
+# --- YouTube / Video ---
+yt-dlp>=2024.1.0
+youtube-transcript-api>=0.6.0
+opencv-python-headless>=4.8.0
+
+# --- Authentication ---
+PyJWT>=2.8.0
+bcrypt>=4.0.0
+
+# --- HTTP ---
+requests>=2.31.0
+
+# --- Environment ---
+python-dotenv>=1.0.0
