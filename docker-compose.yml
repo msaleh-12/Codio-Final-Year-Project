@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./codio-backend
+      dockerfile: Dockerfile
+    image: codio-backend:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8080
+    volumes:
+      - ./codio_cache:/app/codio_cache
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./codio-frontend
+      dockerfile: Dockerfile
+    image: codio-frontend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
