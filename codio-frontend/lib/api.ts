@@ -1,30 +1,39 @@
 
+declare const process: {
+    env: {
+        NEXT_PUBLIC_API_URL?: string;
+        NEXT_PUBLIC_API_TIMEOUT_MS?: string;
+    };
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080/api/v1";
+
 const REQUEST_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 300000); // 5 minutes for video processing
 
 function getApiBaseCandidates(): string[] {
     const candidates: string[] = [];
 
-    // 1. Same-origin proxy via Next.js rewrites (works through any proxy/domain)
-    if (typeof window !== "undefined") {
-        const origin = window.location.origin;
-        candidates.push(`${origin}/api/v1`);
+    // 1. Configured API URL from env (preferred)
+    if (API_BASE_URL) {
+        candidates.push(API_BASE_URL);
     }
 
-    // 2. Configured API URL from env
-    candidates.push(API_BASE_URL);
+    // 2. Same-origin proxy via Next.js rewrites (useful for local dev or proxy-enabled builds)
+    if (typeof window !== "undefined") {
+        const origin = window.location.origin;
+        // Only add same-origin proxy if it is not the same as the configured API URL
+        if (!API_BASE_URL || !API_BASE_URL.includes(window.location.hostname)) {
+            candidates.push(`${origin}/api/v1`);
+        }
+    }
 
     // 3. Direct localhost fallbacks
     candidates.push("http://127.0.0.1:8080/api/v1");
     candidates.push("http://localhost:8080/api/v1");
 
-    // 4. Host-based candidate for custom deployments
-    if (typeof window !== "undefined") {
-        const host = window.location.hostname;
-        if (host && host !== "localhost" && host !== "127.0.0.1" && !host.includes("manus.computer")) {
-            candidates.push(`http://${host}:8080/api/v1`);
-        }
-    }
+    // Note: we intentionally avoid adding a host-based `http://${host}:8080` fallback
+    // because platforms like Vercel will block or mis-route requests to private/internal
+    // hostnames. Prefer an explicit public `NEXT_PUBLIC_API_URL` instead.
 
     return Array.from(new Set(candidates));
 }
