@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getServerApiBaseCandidates } from "@/lib/backend-base"
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -12,12 +13,7 @@ export async function GET(request: NextRequest) {
   const resolvedUrl = playlistUrl || `https://www.youtube.com/playlist?list=${playlistId}`
 
   try {
-    const backendBases = [
-      `${request.nextUrl.origin}/api/v1`,
-      process.env.NEXT_PUBLIC_API_URL || "",
-      "http://127.0.0.1:8080/api/v1",
-      "http://localhost:8080/api/v1",
-    ].filter(Boolean) as string[]
+    const backendBases = getServerApiBaseCandidates(request.nextUrl.origin)
 
     let lastError: unknown = null
 

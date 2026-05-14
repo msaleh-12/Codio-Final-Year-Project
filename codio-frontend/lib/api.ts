@@ -1,47 +1,18 @@
 
+import { getClientApiBaseCandidates } from "@/lib/backend-base";
+
 declare const process: {
     env: {
         NEXT_PUBLIC_API_URL?: string;
+        BACKEND_URL?: string;
         NEXT_PUBLIC_API_TIMEOUT_MS?: string;
     };
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080/api/v1";
-
 const REQUEST_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 300000); // 5 minutes for video processing
 
 function getApiBaseCandidates(): string[] {
-    const candidates: string[] = [];
-
-    // 1. Configured API URL from env (preferred)
-    if (API_BASE_URL) {
-        candidates.push(API_BASE_URL);
-    }
-
-    // 2. Same-origin proxy via Next.js rewrites (local development only)
-    if (typeof window !== "undefined") {
-        const host = window.location.hostname;
-        const isLocalHost = host === "localhost" || host === "127.0.0.1";
-        if (isLocalHost) {
-            const origin = window.location.origin;
-            candidates.push(`${origin}/api/v1`);
-        }
-    }
-
-    // 3. Direct localhost fallbacks (local development only)
-    if (typeof window !== "undefined") {
-        const host = window.location.hostname;
-        if (host === "localhost" || host === "127.0.0.1") {
-            candidates.push("http://127.0.0.1:8080/api/v1");
-            candidates.push("http://localhost:8080/api/v1");
-        }
-    }
-
-    // Note: we intentionally avoid adding a host-based `http://${host}:8080` fallback
-    // because platforms like Vercel will block or mis-route requests to private/internal
-    // hostnames. Prefer an explicit public `NEXT_PUBLIC_API_URL` instead.
-
-    return Array.from(new Set(candidates));
+    return getClientApiBaseCandidates();
 }
 
 // Types for API responses
@@ -231,7 +202,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
         throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
     }
 
-    throw new Error(`Cannot reach backend at ${baseCandidates.join(" or ")}. Ensure backend is running on port 8080.`);
+    const deploymentHint = process.env.NODE_ENV === "production"
+        ? "Set BACKEND_URL or NEXT_PUBLIC_API_URL to your deployed backend in Vercel."
+        : "Ensure the backend is running on port 8080.";
+
+    throw new Error(`Cannot reach backend at ${baseCandidates.join(" or ")}. ${deploymentHint}`);
 }
 
 export const api = {

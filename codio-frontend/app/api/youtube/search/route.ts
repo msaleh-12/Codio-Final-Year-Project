@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerApiBaseCandidates } from "@/lib/backend-base";
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q") || "";
@@ -11,12 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const backendBases = [
-      `${req.nextUrl.origin}/api/v1`,
-      process.env.NEXT_PUBLIC_API_URL || "",
-      "http://127.0.0.1:8080/api/v1",
-      "http://localhost:8080/api/v1",
-    ].filter(Boolean) as string[];
+    const backendBases = getServerApiBaseCandidates(req.nextUrl.origin);
 
     let lastError: unknown = null;
 
