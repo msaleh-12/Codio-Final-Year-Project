@@ -18,18 +18,24 @@ function getApiBaseCandidates(): string[] {
         candidates.push(API_BASE_URL);
     }
 
-    // 2. Same-origin proxy via Next.js rewrites (useful for local dev or proxy-enabled builds)
+    // 2. Same-origin proxy via Next.js rewrites (local development only)
     if (typeof window !== "undefined") {
-        const origin = window.location.origin;
-        // Only add same-origin proxy if it is not the same as the configured API URL
-        if (!API_BASE_URL || !API_BASE_URL.includes(window.location.hostname)) {
+        const host = window.location.hostname;
+        const isLocalHost = host === "localhost" || host === "127.0.0.1";
+        if (isLocalHost) {
+            const origin = window.location.origin;
             candidates.push(`${origin}/api/v1`);
         }
     }
 
-    // 3. Direct localhost fallbacks
-    candidates.push("http://127.0.0.1:8080/api/v1");
-    candidates.push("http://localhost:8080/api/v1");
+    // 3. Direct localhost fallbacks (local development only)
+    if (typeof window !== "undefined") {
+        const host = window.location.hostname;
+        if (host === "localhost" || host === "127.0.0.1") {
+            candidates.push("http://127.0.0.1:8080/api/v1");
+            candidates.push("http://localhost:8080/api/v1");
+        }
+    }
 
     // Note: we intentionally avoid adding a host-based `http://${host}:8080` fallback
     // because platforms like Vercel will block or mis-route requests to private/internal
