@@ -8,6 +8,7 @@ import os
 import re
 import time
 import json
+import base64
 import cv2
 import logging
 import tempfile
@@ -35,9 +36,37 @@ def _resolve_valid_cookie_file() -> Optional[str]:
     """Return a valid Netscape cookie file path or None if invalid/missing."""
     cookie_file = os.getenv('YTDLP_COOKIE_FILE', '').strip()
     if not cookie_file:
-        return None
+        cookie_text = os.getenv('YTDLP_COOKIE_TEXT', '').strip()
+        cookie_b64 = os.getenv('YTDLP_COOKIE_B64', '').strip()
 
-    cookie_path = Path(cookie_file)
+        if not cookie_text and not cookie_b64:
+            return None
+
+        try:
+            if cookie_b64:
+                cookie_bytes = base64.b64decode(cookie_b64)
+                cookie_text = cookie_bytes.decode('utf-8-sig', errors='ignore')
+        except Exception as exc:
+            logger.warning(f"Could not decode YTDLP_COOKIE_B64, skipping cookies: {exc}")
+            return None
+
+        if not cookie_text:
+            return None
+
+        temp_cookie_dir = Path(tempfile.gettempdir()) / 'codio_ytdlp_cookies'
+        temp_cookie_dir.mkdir(exist_ok=True)
+        temp_cookie_file = temp_cookie_dir / 'cookies.txt'
+
+        try:
+            temp_cookie_file.write_text(cookie_text, encoding='utf-8')
+        except Exception as exc:
+            logger.warning(f"Could not write cookie text to temp file, skipping cookies: {exc}")
+            return None
+
+        cookie_path = temp_cookie_file
+    else:
+        cookie_path = Path(cookie_file)
+
     if not cookie_path.is_file():
         logger.warning(f"YTDLP_COOKIE_FILE not found, skipping cookies: {cookie_file}")
         return None

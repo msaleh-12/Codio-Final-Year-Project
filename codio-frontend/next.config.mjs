@@ -9,7 +9,8 @@ const nextConfig = {
   async rewrites() {
     const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
 
-    // In production, do not fallback to localhost. That causes Vercel rewrite failures.
+    // In production, the backend must be reachable over the network.
+    // Localhost only works when the frontend itself is running locally.
     if (!apiUrl) {
       return [];
     }

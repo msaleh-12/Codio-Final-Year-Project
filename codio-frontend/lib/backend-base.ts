@@ -16,11 +16,12 @@ function uniqueBases(values: Array<string | undefined | null>) {
 }
 
 export function getClientApiBaseCandidates() {
-  const candidates = ["/api/v1", getConfiguredBackendBase()]
+  const candidates = [getConfiguredBackendBase()]
 
   if (typeof window !== "undefined") {
     const host = window.location.hostname
     if (host === "localhost" || host === "127.0.0.1") {
+      candidates.unshift("/api/v1")
       candidates.push(...LOCAL_BACKEND_BASES)
     }
   }

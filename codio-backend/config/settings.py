@@ -60,5 +60,7 @@ CODE_COMPLETION_TIMEOUT_SECONDS = float(os.getenv('CODE_COMPLETION_TIMEOUT_SECON
 # yt-dlp / YouTube
 # ---------------------------------------------------------------------------
 YTDLP_COOKIE_FILE = os.getenv('YTDLP_COOKIE_FILE', '').strip()
+YTDLP_COOKIE_TEXT = os.getenv('YTDLP_COOKIE_TEXT', '').strip()
+YTDLP_COOKIE_B64 = os.getenv('YTDLP_COOKIE_B64', '').strip()
 YTDLP_COOKIES_FROM_BROWSER = os.getenv('YTDLP_COOKIES_FROM_BROWSER', '').strip()
 YTDLP_COOKIES_BROWSER_PROFILE = os.getenv('YTDLP_COOKIES_BROWSER_PROFILE', '').strip()
