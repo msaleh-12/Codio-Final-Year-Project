@@ -7,18 +7,21 @@ const nextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
+    const apiBaseUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
 
     // In production, the backend must be reachable over the network.
-    // Localhost only works when the frontend itself is running locally.
-    if (!apiUrl) {
+    // The env var may point at the API base (/api/v1), so strip that suffix
+    // before appending the rewrite path.
+    if (!apiBaseUrl) {
       return [];
     }
+
+    const backendOrigin = apiBaseUrl.replace(/\/api\/v1\/?$/, "");
 
     return [
       {
         source: '/api/v1/:path*',
-        destination: `${apiUrl}/:path*`,
+        destination: `${backendOrigin}/api/v1/:path*`,
       },
     ];
   },
